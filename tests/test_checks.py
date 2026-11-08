@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import json
 import shutil
 import subprocess
@@ -16,6 +17,7 @@ from repo_doctor.checks import (
     check_required_files,
     check_secrets,
 )
+from repo_doctor.cli import parse_size
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 WORK = PROJECT_ROOT / ".test-work"
@@ -126,6 +128,26 @@ def test_excluded_paths_are_skipped(repo_dir: Path) -> None:
     assert check_large_files(root, max_size=64) != []
     assert check_large_files(root, max_size=64, exclude=["vendor/*"]) == []
     assert check_large_files(root, max_size=64, exclude=["*.min.js"]) == []
+
+
+def test_parse_size_accepts_suffixes() -> None:
+    assert parse_size("512") == 512
+    assert parse_size("512KiB") == 512
+    assert parse_size("2M") == 2048
+    assert parse_size("1GiB") == 1024 * 1024
+
+
+def test_parse_size_rejects_garbage() -> None:
+    with pytest.raises(argparse.ArgumentTypeError):
+        parse_size("big")
+
+
+def test_cli_accepts_size_suffix(repo_dir: Path) -> None:
+    root = make_repo(repo_dir)
+    (root / "blob.bin").write_bytes(b"x" * 2048)
+    result = run_cli(root, "--max-size", "1K", "--json")
+    assert result.returncode == 1
+    assert json.loads(result.stdout)[0]["check"] == "large-files"
 
 
 def test_cli_reports_findings_and_exit_code(repo_dir: Path) -> None:

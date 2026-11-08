@@ -38,12 +38,12 @@ repo-doctor: 2 problem(s)
 ```
 
 ```bash
-$ repo-doctor path/to/repo --max-size 256 --json
+$ repo-doctor path/to/repo --max-size 2M --json
 [
   {
     "check": "large-files",
     "path": "assets/demo.gif",
-    "message": "262.1 KiB exceeds 256.0 KiB"
+    "message": "3.2 MiB exceeds 2.0 MiB"
   }
 ]
 ```
@@ -53,7 +53,7 @@ Options:
 | Option | Meaning |
 | --- | --- |
 | `PATH` | repository root, defaults to `.` |
-| `--max-size KIB` | size limit for `large-files`, in KiB |
+| `--max-size SIZE` | size limit for `large-files`, default `1024` (1 MiB); `K`, `M` and `G` suffixes are accepted |
 | `--exclude GLOB` | skip paths matching the glob, repeatable |
 | `--json` | machine-readable output |
 

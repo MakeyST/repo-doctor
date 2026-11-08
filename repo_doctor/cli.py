@@ -29,6 +29,29 @@ def collect_findings(root: Path, max_size: int, exclude: Sequence[str] = ()) -> 
     return findings
 
 
+SIZE_UNITS = {
+    "": 1,
+    "k": 1, "ki": 1, "kib": 1,
+    "m": 1024, "mi": 1024, "mib": 1024,
+    "g": 1024 ** 2, "gi": 1024 ** 2, "gib": 1024 ** 2,
+}
+
+
+def parse_size(text: str) -> int:
+    """Parse '512', '512KiB' or '2M' into a number of KiB."""
+    value = text.strip().lower()
+    for suffix in sorted(SIZE_UNITS, key=len, reverse=True):
+        if suffix and value.endswith(suffix):
+            number, unit = value[: -len(suffix)], SIZE_UNITS[suffix]
+            break
+    else:
+        number, unit = value, SIZE_UNITS[""]
+    try:
+        return int(number) * unit
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"invalid size: {text!r}")
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="repo-doctor",
@@ -37,10 +60,10 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("path", nargs="?", default=Path("."), type=Path, help="repository root (default: .)")
     parser.add_argument(
         "--max-size",
-        type=int,
+        type=parse_size,
         default=DEFAULT_MAX_SIZE // KIB,
-        metavar="KIB",
-        help="flag files larger than this many KiB (default: 1024)",
+        metavar="SIZE",
+        help="flag files larger than SIZE (default: 1024, i.e. 1 MiB; suffixes K/M/G are accepted)",
     )
     parser.add_argument(
         "--exclude",
