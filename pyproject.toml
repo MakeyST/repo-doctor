@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "repo-doctor"
+version = "0.1.0"
+description = "Audit a repository checkout for common hygiene problems"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "MakeyST" }]
+keywords = ["git", "linters", "repository", "hygiene", "cli"]
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Quality Assurance",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[project.scripts]
+repo-doctor = "repo_doctor.cli:entry"
+
+[project.urls]
+Source = "https://github.com/MakeyST/repo-doctor"
+
+[tool.setuptools.packages.find]
+include = ["repo_doctor*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
