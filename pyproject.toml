@@ -7,7 +7,7 @@ name = "repo-doctor"
 version = "0.1.0"
 description = "Audit a repository checkout for common hygiene problems"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [{ name = "MakeyST" }]
 keywords = ["git", "linters", "repository", "hygiene", "cli"]

@@ -1,7 +1,7 @@
 # repo-doctor
 
 [![CI](https://github.com/MakeyST/repo-doctor/actions/workflows/ci.yml/badge.svg)](https://github.com/MakeyST/repo-doctor/actions/workflows/ci.yml)
-[![Python](https://img.shields.io/badge/python-3.9%2B-blue)](https://github.com/MakeyST/repo-doctor)
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://github.com/MakeyST/repo-doctor)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 A tiny, dependency-free command line tool that checks a repository checkout for
