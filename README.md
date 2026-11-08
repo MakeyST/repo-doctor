@@ -62,6 +62,12 @@ Vendored and generated directories (`node_modules`, `.venv`, `dist`, `build`,
 `__pycache__` and friends) are skipped, so the output stays readable on large
 checkouts.
 
+## Limitations
+
+- Only the working tree is inspected: `.git` and vendored directories are skipped.
+- Symlinks are not followed.
+- Secret patterns are heuristics, so a hit is a hint to check, not a verdict.
+
 ## Tests
 
 ```bash
