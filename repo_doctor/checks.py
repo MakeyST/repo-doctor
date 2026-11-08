@@ -9,8 +9,9 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+from fnmatch import fnmatch
 from pathlib import Path
-from typing import Iterator
+from typing import Iterator, Sequence
 
 KIB = 1024
 DEFAULT_MAX_SIZE = 1024 * KIB
@@ -47,14 +48,16 @@ class Finding:
     message: str
 
 
-def iter_files(root: Path) -> Iterator[Path]:
-    """Yield files under *root*, skipping vendored and generated directories."""
+def iter_files(root: Path, exclude: Sequence[str] = ()) -> Iterator[Path]:
+    """Yield files under *root*, skipping vendored directories and *exclude* globs."""
     for path in sorted(root.rglob("*")):
         try:
             rel = path.relative_to(root)
         except ValueError:  # pragma: no cover - rglob always stays below root
             continue
         if any(part in SKIP_DIRS for part in rel.parts):
+            continue
+        if any(fnmatch(rel.as_posix(), pattern) or fnmatch(path.name, pattern) for pattern in exclude):
             continue
         if path.is_symlink() or path.is_dir():
             continue
@@ -106,10 +109,10 @@ def check_required_files(root: Path) -> list[Finding]:
     return findings
 
 
-def check_large_files(root: Path, max_size: int = DEFAULT_MAX_SIZE) -> list[Finding]:
+def check_large_files(root: Path, max_size: int = DEFAULT_MAX_SIZE, exclude: Sequence[str] = ()) -> list[Finding]:
     """Flag files that are larger than *max_size* bytes."""
     findings: list[Finding] = []
-    for path in iter_files(root):
+    for path in iter_files(root, exclude):
         try:
             size = path.stat().st_size
         except OSError:
@@ -125,10 +128,10 @@ def check_large_files(root: Path, max_size: int = DEFAULT_MAX_SIZE) -> list[Find
     return findings
 
 
-def check_secrets(root: Path) -> list[Finding]:
+def check_secrets(root: Path, exclude: Sequence[str] = ()) -> list[Finding]:
     """Look for credentials that should never be committed."""
     findings: list[Finding] = []
-    for path in iter_files(root):
+    for path in iter_files(root, exclude):
         text = _read_text(path)
         if text is None:
             continue
@@ -138,10 +141,10 @@ def check_secrets(root: Path) -> list[Finding]:
     return findings
 
 
-def check_conflict_markers(root: Path) -> list[Finding]:
+def check_conflict_markers(root: Path, exclude: Sequence[str] = ()) -> list[Finding]:
     """Catch files saved in the middle of a merge."""
     findings: list[Finding] = []
-    for path in iter_files(root):
+    for path in iter_files(root, exclude):
         text = _read_text(path)
         if text is None:
             continue

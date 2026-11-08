@@ -118,6 +118,16 @@ def run_cli(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
     )
 
 
+def test_excluded_paths_are_skipped(repo_dir: Path) -> None:
+    root = make_repo(repo_dir)
+    vendor = root / "vendor"
+    vendor.mkdir()
+    (vendor / "bundle.min.js").write_bytes(b"x" * 200)
+    assert check_large_files(root, max_size=64) != []
+    assert check_large_files(root, max_size=64, exclude=["vendor/*"]) == []
+    assert check_large_files(root, max_size=64, exclude=["*.min.js"]) == []
+
+
 def test_cli_reports_findings_and_exit_code(repo_dir: Path) -> None:
     root = make_repo(repo_dir)
     (root / "blob.bin").write_bytes(b"x" * 2048)

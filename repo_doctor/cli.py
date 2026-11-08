@@ -20,12 +20,12 @@ from .checks import (
 )
 
 
-def collect_findings(root: Path, max_size: int) -> list[Finding]:
+def collect_findings(root: Path, max_size: int, exclude: Sequence[str] = ()) -> list[Finding]:
     findings: list[Finding] = []
     findings += check_required_files(root)
-    findings += check_large_files(root, max_size)
-    findings += check_secrets(root)
-    findings += check_conflict_markers(root)
+    findings += check_large_files(root, max_size, exclude)
+    findings += check_secrets(root, exclude)
+    findings += check_conflict_markers(root, exclude)
     return findings
 
 
@@ -41,6 +41,13 @@ def _build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_MAX_SIZE // KIB,
         metavar="KIB",
         help="flag files larger than this many KiB (default: 1024)",
+    )
+    parser.add_argument(
+        "--exclude",
+        action="append",
+        default=[],
+        metavar="GLOB",
+        help="skip paths matching this glob, repeatable (e.g. --exclude '*.min.js')",
     )
     parser.add_argument("--json", action="store_true", help="print findings as JSON")
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
@@ -58,7 +65,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         print("repo-doctor: --max-size must be positive", file=sys.stderr)
         return 2
 
-    findings = collect_findings(root, args.max_size * KIB)
+    findings = collect_findings(root, args.max_size * KIB, args.exclude)
 
     if args.json:
         print(json.dumps([f.__dict__ for f in findings], indent=2))

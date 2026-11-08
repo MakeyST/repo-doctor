@@ -54,6 +54,7 @@ Options:
 | --- | --- |
 | `PATH` | repository root, defaults to `.` |
 | `--max-size KIB` | size limit for `large-files`, in KiB |
+| `--exclude GLOB` | skip paths matching the glob, repeatable |
 | `--json` | machine-readable output |
 
 Exit codes: `0` means clean, `1` means at least one finding, `2` means bad usage.
